@@ -1,0 +1,10 @@
+content:
+  "/":
+    title: GitHub Website Runner Example
+    filePath: index.html
+  "/styles.css":
+    title: Default styles file
+    filePath: styles.css
+  "/badgers":
+    title: Badgers page
+    filePath: badgers/index.html
