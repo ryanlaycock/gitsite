@@ -1,8 +1,9 @@
 use std::{path::PathBuf, fmt, env};
+use std::error::Error;
 use std::collections::BTreeMap;
 
 use actix_files::NamedFile;
-use actix_web::{get, web, App, Error, HttpRequest, HttpServer, ResponseError};
+use actix_web::{get, web, App, HttpRequest, HttpServer, ResponseError};
 
 use serde::Deserialize;
 use serde_yaml::{self};
@@ -41,15 +42,24 @@ impl ResponseError for CustomError {}
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let local_files_dir = env::var("LOCAL_FILES_DIR").expect("LOCAL_FILES_DIR not found");
-    let cfg_file = env::var("CONFIG_FILE").expect("CFG_FILE not found");
+    let cfg_file = env::var("CONFIG_FILE").expect("CONFIG_FILE not found");
 
     env_logger::init();
 
-    let config_str: String = get_config_str(cfg_file).unwrap();
-    let result: Result<Config, serde_yaml::Error> = serde_yaml::from_str(&config_str);
-    let site_config = result.unwrap();
+    let site_config = match get_config(&cfg_file) {
+        Ok(v) => {
+            println!("Parsed config at: {} : {:?}", cfg_file, v);
+            Ok(v)
+        }
+        Err(err) => {
+            // Handle the error
+            eprintln!("Could not parse config at: {}: {}", cfg_file, err);
+            Err(err)
+        }
+    };
+
     let app_data = AppData { 
-        site_config: site_config,
+        site_config: site_config.unwrap(),
         local_files_dir: local_files_dir,
     };
 
@@ -88,14 +98,33 @@ async fn fetch_file(data: web::Data<AppData>, req: HttpRequest) -> Result<NamedF
     Err(CustomError("Key not found".to_string()))
 }
 
-fn get_config_str(file_location: String) -> Result<String, Error> {
-    let f = std::fs::read_to_string(file_location);
-    let file_str = match f {
-        Ok(v) => v,
-        Err(e) => {
-            println!("Error {}", e);
-            return Err(e.into());
+#[derive(Debug)]
+enum ConfigError {
+    FileReadError(std::io::Error),
+    YamlParseError(serde_yaml::Error),
+    CustomMessage(String),
+}
+
+impl std::fmt::Display for ConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            ConfigError::FileReadError(err) => write!(f, "File read error: {}", err),
+            ConfigError::YamlParseError(err) => write!(f, "YAML parse error: {}", err),
+            ConfigError::CustomMessage(msg) => write!(f, "{}", msg),
         }
+    }
+}
+
+impl Error for ConfigError {}
+
+fn get_config(file_location: &String) -> Result<Config, ConfigError> {
+    let file_str = match std::fs::read_to_string(file_location) {
+        Ok(v) => v,
+        Err(err) => return Err(ConfigError::FileReadError(err)),
     };
-    Ok(file_str)
+
+    match serde_yaml::from_str(&file_str) {
+        Ok(v) => Ok(v),
+        Err(err) => Err(ConfigError::YamlParseError(err)),
+    }
 }
