@@ -28,17 +28,6 @@ struct AppData {
     local_files_dir: String,
 }
 
-#[derive(Debug)]
-struct CustomError(String);
-
-impl fmt::Display for CustomError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Custom error: {}", self.0)
-    }
-}
-
-impl ResponseError for CustomError {}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let local_files_dir = env::var("LOCAL_FILES_DIR").expect("LOCAL_FILES_DIR not found");
@@ -46,13 +35,12 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init();
 
-    let site_config = match get_config(&cfg_file) {
+    let site_config = match get_local_config(&cfg_file) {
         Ok(v) => {
             println!("Parsed config at: {} : {:?}", cfg_file, v);
             Ok(v)
         }
         Err(err) => {
-            // Handle the error
             eprintln!("Could not parse config at: {}: {}", cfg_file, err);
             Err(err)
         }
@@ -77,54 +65,74 @@ async fn main() -> std::io::Result<()> {
 }
 
 #[get("/{path:.*}")]
-async fn fetch_file(data: web::Data<AppData>, req: HttpRequest) -> Result<NamedFile, CustomError> {
-    println!("Fetching file {} from config {:?}", req.path(), data.site_config);
-    
-    if let Some(page) = data.site_config.content.get(req.path()) {
-        let mut web_path = data.local_files_dir.clone();
-        web_path.push_str(&page.filePath);
-        println!("Opening {:?}", web_path);
-        
-        let path: PathBuf = web_path.into();
+async fn fetch_file(data: web::Data<AppData>, req: HttpRequest) -> Result<NamedFile, CustomActixError> {
+    println!("GET request on: {}", req.path());
 
-        if let Ok(file) = NamedFile::open(&path) {
-            return Ok(file);
-        } else {
-            // Value is not a valid file path
-            return Err(CustomError("Invalid file path".to_string()));
+    match get_local_file_path(data.into_inner(), req.path().to_string()) {
+        Ok(v) => {
+            println!("found local file path: {} for path: {}", v.display(), req.path());
+            match NamedFile::open(v) {
+                Ok(v) => return Ok(v),
+                Err(err) => return Err(CustomActixError(err.to_string())),
+            }
+        }
+        Err(_) => {
+            println!("Could not find file: {} Redirect to 404 NOT_FOUND", req.path());
+            return Err(CustomActixError("Invalid file path".to_string()))
         }
     }
+}
 
-    Err(CustomError("Key not found".to_string()))
+fn get_local_file_path(data: Arc<AppData>, path: String) -> Result<PathBuf, FileError> {
+    if let Some(page) = data.site_config.content.get(&path) {
+        let mut web_path = data.local_files_dir.clone();
+        web_path.push_str(&page.filePath);
+        
+        return Ok(web_path.into())
+    }
+    Err(FileError::LocalFileNotFound())
 }
 
 #[derive(Debug)]
-enum ConfigError {
+enum FileError {
     FileReadError(std::io::Error),
     YamlParseError(serde_yaml::Error),
+    LocalFileNotFound(),
     CustomMessage(String),
 }
 
-impl std::fmt::Display for ConfigError {
+impl std::fmt::Display for FileError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            ConfigError::FileReadError(err) => write!(f, "File read error: {}", err),
-            ConfigError::YamlParseError(err) => write!(f, "YAML parse error: {}", err),
-            ConfigError::CustomMessage(msg) => write!(f, "{}", msg),
+            FileError::FileReadError(err) => write!(f, "File read error: {}", err),
+            FileError::YamlParseError(err) => write!(f, "YAML parse error: {}", err),
+            FileError::LocalFileNotFound() => write!(f, "{}", "local file not found"),
+            FileError::CustomMessage(msg) => write!(f, "{}", msg),
         }
     }
 }
 
-impl Error for ConfigError {}
+impl Error for FileError {}
 
-fn get_config(file_location: &String) -> Result<Config, ConfigError> {
+#[derive(Debug)]
+struct CustomActixError(String);
+
+impl fmt::Display for CustomActixError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Custom error: {}", self.0)
+    }
+}
+
+impl ResponseError for CustomActixError {}
+
+fn get_local_config(file_location: &String) -> Result<Config, FileError> {
     let file_str = match std::fs::read_to_string(file_location) {
         Ok(v) => v,
-        Err(err) => return Err(ConfigError::FileReadError(err)),
+        Err(err) => return Err(FileError::FileReadError(err)),
     };
 
     match serde_yaml::from_str(&file_str) {
         Ok(v) => Ok(v),
-        Err(err) => Err(ConfigError::YamlParseError(err)),
+        Err(err) => Err(FileError::YamlParseError(err)),
     }
 }
