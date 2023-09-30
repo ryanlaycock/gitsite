@@ -1,9 +1,9 @@
-use std::{path::PathBuf, fmt, env};
+use std::{path::PathBuf, fmt, env, io};
 use std::error::Error;
 use std::collections::BTreeMap;
 
 use actix_files::NamedFile;
-use actix_web::{get, web, App, HttpRequest, HttpServer, ResponseError};
+use actix_web::{get, web, App, HttpRequest, HttpServer, ResponseError, HttpResponse, middleware};
 
 use serde::Deserialize;
 use serde_yaml::{self};
@@ -135,4 +135,25 @@ fn get_local_config(file_location: &String) -> Result<Config, FileError> {
         Ok(v) => Ok(v),
         Err(err) => Err(FileError::YamlParseError(err)),
     }
+}
+
+fn cache_local_file(req: HttpRequest) -> io::Result<()> {
+    if !std::path::Path::new(&local_file_path).exists() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Local file not found",
+        ));
+    }
+
+    std::fs::create_dir_all(&destination_dir)?;
+
+    let local_file_name = std::path::Path::new(&local_file_path)
+        .file_name()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "Invalid file name"))?;
+    let destination_file_path = std::path::Path::new(&destination_dir).join(&local_file_name);
+
+    // Copy the file from the source to the destination
+    std::fs::copy(local_file_path, &destination_file_path)?;
+
+    Ok(())
 }
