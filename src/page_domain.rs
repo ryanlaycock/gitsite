@@ -1,11 +1,10 @@
-use std::collections::BTreeMap;
 use std::fs;
 use std::error::Error;
 use crate::models::{
     AppData,
     MemoryPage,
     Config,
-    Page, HeaderLink,
+    HeaderLink,
 };
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};

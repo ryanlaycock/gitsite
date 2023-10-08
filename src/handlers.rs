@@ -3,7 +3,7 @@ use crate::page_domain::{
     update_and_get_content_page,
     update_and_get_lib_page,
     update_and_get_tmpl_page,
-    get_headers, FileError,
+    get_headers,
 };
 
 use axum::{
@@ -12,7 +12,6 @@ use axum::{
     extract::{Path, State},
     http::StatusCode
 };
-use serde_json::error;
 use std::sync::Arc;
 
 pub async fn get_lib_handler(Path(path): Path<String>, State(shared_state): State<Arc<AppData>>) ->  Result<impl IntoResponse, (StatusCode, [(&'static str, &'static str); 1], &'static str)> {
