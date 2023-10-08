@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 use std::time::SystemTime;
 use std::collections::BTreeMap;
@@ -9,7 +9,6 @@ pub struct Page {
     pub title: String,
     pub file_path: String,
     pub tmpl_html: String,
-    // child: HashMap<String, Page>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -18,10 +17,24 @@ pub struct LibFile {
     pub file_path: String,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct HeaderLink {
+    pub path: String,
+    pub name: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct Header {
+    pub links: Vec<HeaderLink>,
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     pub lib: BTreeMap<String, LibFile>,
     pub content: BTreeMap<String, Page>,
+    pub header: Header,
 }
 
 #[derive(Deserialize, Debug, Clone)]

@@ -5,7 +5,7 @@ use crate::models::{
     AppData,
     MemoryPage,
     Config,
-    Page,
+    Page, HeaderLink,
 };
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -110,4 +110,8 @@ fn get_local_file_string(path: String) -> Result<String, FileError> {
         Ok(v) => return Ok(v),
         Err(_) => return Err(FileError::LocalFileNotFound())
     };
+}
+
+pub fn get_headers(app_data: &Arc<AppData>) -> Result<Vec<HeaderLink>, FileError> {
+    return Ok(app_data.site_config.header.links.clone());
 }

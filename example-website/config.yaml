@@ -6,6 +6,13 @@ lib:
   "tmpl.js":
     filePath: lib/tmpl.js
 
+header:
+  links:
+    - path: badgers
+      name: Badgers
+    - path: badgers/more
+      name: More Badgers
+
 content:
   "index":
     title: GitHub Website Runner Example
@@ -16,6 +23,6 @@ content:
     filePath: badgers/index.html
     tmplHtml: tmpl.html
   "badgers/more":
-    title: Badgers page
+    title: More badgers page
     filePath: badgers/more/index.html
     tmplHtml: tmpl.html
