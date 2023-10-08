@@ -8,3 +8,6 @@ content:
   "badgers":
     title: Badgers page
     filePath: badgers/index.html
+  "badgers/more":
+    title: Badgers page
+    filePath: badgers/more/index.html
