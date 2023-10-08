@@ -4,14 +4,22 @@ use std::time::SystemTime;
 use std::collections::BTreeMap;
 
 #[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
 pub struct Page {
     pub title: String,
-    pub filePath: String,
+    pub file_path: String,
     // child: HashMap<String, Page>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct LibFile {
+    pub file_path: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
+    pub lib: BTreeMap<String, LibFile>,
     pub content: BTreeMap<String, Page>,
 }
 

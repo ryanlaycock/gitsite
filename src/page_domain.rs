@@ -1,9 +1,11 @@
+use std::collections::BTreeMap;
 use std::fs;
 use std::error::Error;
 use crate::models::{
     AppData,
     MemoryPage,
     Config,
+    Page,
 };
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -31,40 +33,53 @@ impl std::fmt::Display for FileError {
 
 impl Error for FileError {}
 
-pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError> {
-    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, app_data.site_config.content);
-    if let Some(page) = app_data.site_config.content.get(path) {
-        println!("Found page {:?}", page);
-
-        // Check if we already have this cached (within 10 seconds)
-        if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
-            println!("Already cached memory_page {:?}", memory_page);
-            if SystemTime::now().duration_since(memory_page.last_updated_at).unwrap_or(Duration::from_secs(0)) < Duration::from_secs(10) {
-                return Ok(memory_page.to_owned());
-            }
-        }
-        
-        // TODO add check on local file OR GitHub file
-
-        // Update and return from a local file
-        let mut local_file_str = app_data.local_files_dir.clone();
-        local_file_str.push_str(page.filePath.as_str());
-        println!("Fetching locally {:?} at location {:?}", page, local_file_str);
-        match get_local_file_string(local_file_str) {
-            Ok(file_string) => {
-                let new_memory_page: MemoryPage = MemoryPage { content: file_string, last_updated_at: SystemTime::now() };
-                app_data.memory_pages.write().await.insert(path.to_string(), new_memory_page.clone());
-                println!("Memory page after cache {:?}", app_data);
-                return Ok(new_memory_page);
-            },
-            Err(_) => return Err(FileError::FileNotFound())
-        };
-
-        // TODO Update and return from GitHub
+pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
+    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, app_data.site_config.lib);
+    if let Some(page) = app_data.site_config.lib.get(path) {
+        return update_and_get_in_memory(&app_data, path, &page.file_path).await;
     } else {
         // File not defined in config
         return Err(FileError::FileNotFound())
     }
+}
+
+pub async fn update_and_get_content_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
+    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, app_data.site_config.content);
+    if let Some(page) = app_data.site_config.content.get(path) {
+        return update_and_get_in_memory(&app_data, path, &page.file_path).await;
+    } else {
+        // File not defined in config
+        return Err(FileError::FileNotFound())
+    }
+}
+
+async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String) -> Result<MemoryPage, FileError> {
+    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, content_file_path);
+
+    // Check if we already have this cached (within 10 seconds)
+    if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
+        println!("Already cached memory_page {:?}", memory_page);
+        if SystemTime::now().duration_since(memory_page.last_updated_at).unwrap_or(Duration::from_secs(0)) < Duration::from_secs(10) {
+            return Ok(memory_page.to_owned());
+        }
+    }
+    
+    // TODO add check on local file OR GitHub file
+
+    // Update and return from a local file
+    let mut local_file_str = app_data.local_files_dir.clone();
+    local_file_str.push_str(content_file_path.as_str());
+    println!("Fetching locally {:?} at location {:?}", content_file_path, local_file_str);
+    match get_local_file_string(local_file_str) {
+        Ok(file_string) => {
+            let new_memory_page: MemoryPage = MemoryPage { content: file_string, last_updated_at: SystemTime::now() };
+            app_data.memory_pages.write().await.insert(path.to_string(), new_memory_page.clone());
+            println!("Memory page after cache {:?}", app_data);
+            return Ok(new_memory_page);
+        },
+        Err(_) => return Err(FileError::FileNotFound())
+    };
+
 }
 
 pub fn get_local_config(file_location: &String) -> Result<Config, FileError> {
