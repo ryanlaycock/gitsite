@@ -7,15 +7,15 @@ lib:
     filePath: lib/tmpl.js
 
 content:
-  "index":
+  "":
     title: GitHub Website Runner Example
     filePath: index.html
-  "styles.css":
-    title: Default styles file
-    filePath: styles.css
+    tmplHtml: tmpl.html
   "badgers":
     title: Badgers page
     filePath: badgers/index.html
+    tmplHtml: tmpl.html
   "badgers/more":
     title: Badgers page
     filePath: badgers/more/index.html
+    tmplHtml: tmpl.html

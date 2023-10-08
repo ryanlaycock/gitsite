@@ -53,6 +53,21 @@ pub async fn update_and_get_content_page(app_data: Arc<AppData>, path: &String) 
     }
 }
 
+pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
+    if let Some(page) = app_data.site_config.content.get(path) {
+        if let Some(lib_page) = app_data.site_config.lib.get(&page.tmpl_html) {
+            // If requested path is specified, and tmplHtml is specified, load it
+            return update_and_get_in_memory(&app_data, &page.tmpl_html, &lib_page.file_path).await;
+        } else {
+            // File not defined in config
+            return Err(FileError::FileNotFound())
+        }
+    } else {
+        // File not defined in config
+        return Err(FileError::FileNotFound())
+    }
+}
+
 async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String) -> Result<MemoryPage, FileError> {
     println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, content_file_path);
 

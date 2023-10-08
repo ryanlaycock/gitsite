@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 pub struct Page {
     pub title: String,
     pub file_path: String,
+    pub tmpl_html: String,
     // child: HashMap<String, Page>,
 }
 
