@@ -34,7 +34,6 @@ impl std::fmt::Display for FileError {
 impl Error for FileError {}
 
 pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
-    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, app_data.site_config.lib);
     if let Some(page) = app_data.site_config.lib.get(path) {
         return update_and_get_in_memory(&app_data, path, &page.file_path).await;
     } else {
@@ -44,7 +43,6 @@ pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> R
 }
 
 pub async fn update_and_get_content_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
-    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, app_data.site_config.content);
     if let Some(page) = app_data.site_config.content.get(path) {
         return update_and_get_in_memory(&app_data, path, &page.file_path).await;
     } else {
@@ -69,8 +67,6 @@ pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> 
 }
 
 async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String) -> Result<MemoryPage, FileError> {
-    println!("Looking in memory {:?} for {:?} in {:?}", app_data.memory_pages, path, content_file_path);
-
     // Check if we already have this cached (within 10 seconds)
     if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
         println!("Already cached memory_page {:?}", memory_page);
