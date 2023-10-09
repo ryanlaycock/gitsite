@@ -10,6 +10,7 @@ pub struct Page {
     pub file_path: String,
     pub tmpl_html: String,
     pub github_project: Option<String>,
+    pub recache_seconds: Option<u64>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -17,6 +18,7 @@ pub struct Page {
 pub struct LibFile {
     pub file_path: String,
     pub github_project: Option<String>,
+    pub recache_seconds: Option<u64>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -32,11 +34,19 @@ pub struct Header {
     pub links: Vec<HeaderLink>,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct SiteConfig {
+    pub default_recache_seconds: u64,
+}
+
 #[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
 pub struct Config {
     pub lib: BTreeMap<String, LibFile>,
     pub content: BTreeMap<String, Page>,
     pub header: Header,
+    pub site_config: SiteConfig,
 }
 
 #[derive(Deserialize, Debug, Clone)]

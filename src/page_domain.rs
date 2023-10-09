@@ -36,7 +36,13 @@ impl Error for FileError {}
 
 pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
     if let Some(page) = app_data.site_config.lib.get(path) {
-        return update_and_get_in_memory(&app_data, path, &page.file_path, &page.github_project).await;
+        return update_and_get_in_memory(
+            &app_data,
+            path,
+            &page.file_path,
+            &page.github_project,
+            get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
+            .await;
     } else {
         // File not defined in config
         return Err(FileError::FileNotFound())
@@ -45,7 +51,13 @@ pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> R
 
 pub async fn update_and_get_content_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
     if let Some(page) = app_data.site_config.content.get(path) {
-        return update_and_get_in_memory(&app_data, path, &page.file_path, &page.github_project).await;
+        return update_and_get_in_memory(
+            &app_data,
+            path,
+            &page.file_path,
+            &page.github_project,
+            get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
+            .await;
     } else {
         // File not defined in config
         return Err(FileError::FileNotFound())
@@ -56,7 +68,13 @@ pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> 
     if let Some(page) = app_data.site_config.content.get(path) {
         if let Some(lib_page) = app_data.site_config.lib.get(&page.tmpl_html) {
             // If requested path is specified, and tmplHtml is specified, load it
-            return update_and_get_in_memory(&app_data, &page.tmpl_html, &lib_page.file_path, &lib_page.github_project).await;
+            return update_and_get_in_memory(
+                &app_data,
+                &page.tmpl_html,
+                &lib_page.file_path,
+                &lib_page.github_project,
+                get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
+                .await;
         } else {
             // File not defined in config
             return Err(FileError::FileNotFound())
@@ -67,11 +85,18 @@ pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> 
     }
 }
 
-async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String, github_project: &Option<String>) -> Result<MemoryPage, FileError> {
+fn get_recache_seconds(page_recache_seconds: Option<u64>, default_recache_seconds: u64) -> u64 {
+    if let Some(page_recache_seconds) = page_recache_seconds {
+        return page_recache_seconds;
+    }
+    return default_recache_seconds;
+}
+
+async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String, github_project: &Option<String>, cache_time: u64) -> Result<MemoryPage, FileError> {
     // Check if we already have this cached
     if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
         println!("Already cached memory_page {:?}", memory_page);
-        if SystemTime::now().duration_since(memory_page.last_updated_at).unwrap_or(Duration::from_secs(0)) < Duration::from_secs(10) {
+        if SystemTime::now().duration_since(memory_page.last_updated_at).unwrap_or(Duration::from_secs(0)) < Duration::from_secs(cache_time) {
             return Ok(memory_page.to_owned());
         }
         // TODO Else return the old page but run this fetch in the background

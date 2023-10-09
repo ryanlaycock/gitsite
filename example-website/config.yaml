@@ -5,15 +5,24 @@ lib:
     filePath: lib/tmpl.css
   "tmpl.js":
     filePath: lib/tmpl.js
+  "github-markdown-light.css":
+    filePath: github-markdown-light.css
+    githubProject: sindresorhus/github-markdown-css
+    recacheSeconds: 600
 
 header:
   links:
+    - path: index
+      name: Home
     - path: badgers
       name: Badgers
     - path: badgers/more
       name: More Badgers
     - path: githubpage
       name: GitHub Example
+
+siteConfig:
+  defaultRecacheSeconds: 1
 
 content:
   "index":
@@ -33,3 +42,4 @@ content:
     filePath: README.md
     tmplHtml: tmpl.html
     githubProject: othneildrew/Best-README-Template
+    recacheSeconds: 60
