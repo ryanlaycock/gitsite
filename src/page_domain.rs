@@ -1,5 +1,6 @@
 use std::fs;
 use std::error::Error;
+use std::thread;
 use crate::models::{
     AppData,
     MemoryPage,
@@ -67,15 +68,17 @@ pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> 
 }
 
 async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String, github_project: &Option<String>) -> Result<MemoryPage, FileError> {
-    // Check if we already have this cached (within 10 seconds)
+    // Check if we already have this cached
     if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
         println!("Already cached memory_page {:?}", memory_page);
         if SystemTime::now().duration_since(memory_page.last_updated_at).unwrap_or(Duration::from_secs(0)) < Duration::from_secs(10) {
             return Ok(memory_page.to_owned());
         }
+        // TODO Else return the old page but run this fetch in the background
+        // No need to make the user wait for the reload
     }
     
-    // TODO add check on local file OR GitHub file
+    // Check if we should get this from GitHub
     if let Some(github_project_string) = github_project {
         match get_github_file_string(github_project_string.to_owned(), content_file_path.to_owned()).await {
             Ok(file_string) => {
