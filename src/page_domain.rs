@@ -8,6 +8,7 @@ use crate::models::{
 };
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
+use reqwest::header;
 
 #[derive(Debug)]
 pub enum FileError {
@@ -34,7 +35,7 @@ impl Error for FileError {}
 
 pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
     if let Some(page) = app_data.site_config.lib.get(path) {
-        return update_and_get_in_memory(&app_data, path, &page.file_path).await;
+        return update_and_get_in_memory(&app_data, path, &page.file_path, &page.github_project).await;
     } else {
         // File not defined in config
         return Err(FileError::FileNotFound())
@@ -43,7 +44,7 @@ pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> R
 
 pub async fn update_and_get_content_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
     if let Some(page) = app_data.site_config.content.get(path) {
-        return update_and_get_in_memory(&app_data, path, &page.file_path).await;
+        return update_and_get_in_memory(&app_data, path, &page.file_path, &page.github_project).await;
     } else {
         // File not defined in config
         return Err(FileError::FileNotFound())
@@ -54,7 +55,7 @@ pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> 
     if let Some(page) = app_data.site_config.content.get(path) {
         if let Some(lib_page) = app_data.site_config.lib.get(&page.tmpl_html) {
             // If requested path is specified, and tmplHtml is specified, load it
-            return update_and_get_in_memory(&app_data, &page.tmpl_html, &lib_page.file_path).await;
+            return update_and_get_in_memory(&app_data, &page.tmpl_html, &lib_page.file_path, &lib_page.github_project).await;
         } else {
             // File not defined in config
             return Err(FileError::FileNotFound())
@@ -65,7 +66,7 @@ pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> 
     }
 }
 
-async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String) -> Result<MemoryPage, FileError> {
+async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String, github_project: &Option<String>) -> Result<MemoryPage, FileError> {
     // Check if we already have this cached (within 10 seconds)
     if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
         println!("Already cached memory_page {:?}", memory_page);
@@ -75,6 +76,14 @@ async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, conten
     }
     
     // TODO add check on local file OR GitHub file
+    if let Some(github_project_string) = github_project {
+        match get_github_file_string(github_project_string.to_owned(), content_file_path.to_owned()).await {
+            Ok(file_string) => {
+                return Ok(cache_file_string(app_data, path.to_string(), file_string).await);
+            },
+            Err(_) => return Err(FileError::FileNotFound())
+        };
+    }
 
     // Update and return from a local file
     let mut local_file_str = app_data.local_files_dir.clone();
@@ -82,10 +91,7 @@ async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, conten
     println!("Fetching locally {:?} at location {:?}", content_file_path, local_file_str);
     match get_local_file_string(local_file_str) {
         Ok(file_string) => {
-            let new_memory_page: MemoryPage = MemoryPage { content: file_string, last_updated_at: SystemTime::now() };
-            app_data.memory_pages.write().await.insert(path.to_string(), new_memory_page.clone());
-            println!("Memory page after cache {:?}", app_data);
-            return Ok(new_memory_page);
+            return Ok(cache_file_string(app_data, path.to_string(), file_string).await);
         },
         Err(_) => return Err(FileError::FileNotFound())
     };
@@ -101,6 +107,31 @@ pub fn get_local_config(file_location: &String) -> Result<Config, FileError> {
     match serde_yaml::from_str(&file_str) {
         Ok(v) => Ok(v),
         Err(err) => Err(FileError::YamlParseError(err)),
+    }
+}
+
+async fn cache_file_string(app_data: &Arc<AppData>, path: String, file_string: String) -> MemoryPage {
+    let new_memory_page: MemoryPage = MemoryPage { content: file_string, last_updated_at: SystemTime::now() };
+    app_data.memory_pages.write().await.insert(path.to_string(), new_memory_page.clone());
+    println!("Memory page after cache {:?}", app_data);
+    return new_memory_page;
+}
+
+async fn get_github_file_string(project: String, path: String) -> Result<String, reqwest::Error> {
+    let source = format!("https://api.github.com/repos/{}/contents/{}", project, path);
+    println!("Requesting path {:?} from GitHub with request {:?}", path, source);
+    let client = reqwest::Client::new();
+    match client
+        .get(source)
+        .header(header::USER_AGENT, "gitsite")
+        .header(header::ACCEPT, "application/vnd.github.html")
+        .send()
+        .await?.text().await {
+        Ok(resp) => {
+            println!("body = {:?}", resp);
+            return Ok(resp);
+        },
+        Err(err) => return Err(err),
     }
 }
 

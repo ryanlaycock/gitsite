@@ -20,7 +20,6 @@ pub async fn get_lib_handler(Path(path): Path<String>, State(shared_state): Stat
        
     match update_and_get_lib_page(app_data.to_owned(), &path).await {
         Ok(memory_page) => {
-            
             return Ok((StatusCode::OK, [("Content-Type", "text")], memory_page.content));
         },
         Err(_) => {

@@ -12,6 +12,8 @@ header:
       name: Badgers
     - path: badgers/more
       name: More Badgers
+    - path: githubpage
+      name: GitHub Example
 
 content:
   "index":
@@ -26,3 +28,8 @@ content:
     title: More badgers page
     filePath: badgers/more/index.html
     tmplHtml: tmpl.html
+  "githubpage":
+    title: GitHub Example
+    filePath: README.md
+    tmplHtml: tmpl.html
+    githubProject: othneildrew/Best-README-Template

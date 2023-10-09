@@ -9,12 +9,14 @@ pub struct Page {
     pub title: String,
     pub file_path: String,
     pub tmpl_html: String,
+    pub github_project: Option<String>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all="camelCase")]
 pub struct LibFile {
     pub file_path: String,
+    pub github_project: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
