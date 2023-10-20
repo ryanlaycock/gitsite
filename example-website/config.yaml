@@ -25,7 +25,7 @@ siteConfig:
   defaultRecacheSeconds: 1
 
 content:
-  "index":
+  "":
     title: GitHub Website Runner Example
     filePath: index.html
     tmplHtml: tmpl.html

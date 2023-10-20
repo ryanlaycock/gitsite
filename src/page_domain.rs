@@ -57,7 +57,6 @@ pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> R
     }
 }
 
-
 pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
     if let Some(page) = app_data.site_config.content.get(path) {
         if let Some(lib_page) = app_data.site_config.lib.get(&page.tmpl_html) {
