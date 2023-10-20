@@ -14,10 +14,7 @@ pub fn create_router(shared_state: Arc<AppData>) -> Router {
         // Page and content loading handlers
         .route("/lib/*lib_path", get(handlers::get_lib_handler))
         
-        .route("/content/*content_path", get(handlers::get_content_handler))
-        .route("/content/", get(handlers::get_index_content_handler))
-        
-        .route("/*tmpl_path", get(handlers::get_tmpl_handler))
+        .route("/*tmpl_path", get(handlers::get_page_handler))
         
         .route("/", get(handlers::get_index_handler))
 

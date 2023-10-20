@@ -1,6 +1,5 @@
 use std::fs;
 use std::error::Error;
-use std::thread;
 use crate::models::{
     AppData,
     MemoryPage,
@@ -10,6 +9,8 @@ use crate::models::{
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use reqwest::header;
+use handlebars::{Handlebars, to_json, RenderError};
+use serde::Serialize;
 
 #[derive(Debug)]
 pub enum FileError {
@@ -19,6 +20,12 @@ pub enum FileError {
     FileNotFound(),
     CustomMessage(String),
 }
+
+#[derive(Debug, Serialize)]
+struct TemplateContent {
+    content: String,
+}
+
 
 impl std::fmt::Display for FileError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -49,40 +56,55 @@ pub async fn update_and_get_lib_page(app_data: Arc<AppData>, path: &String) -> R
     }
 }
 
-pub async fn update_and_get_content_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
-    if let Some(page) = app_data.site_config.content.get(path) {
-        return update_and_get_in_memory(
-            &app_data,
-            path,
-            &page.file_path,
-            &page.github_project,
-            get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
-            .await;
-    } else {
-        // File not defined in config
-        return Err(FileError::FileNotFound())
-    }
-}
 
-pub async fn update_and_get_tmpl_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
+pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Result<MemoryPage, FileError>{
     if let Some(page) = app_data.site_config.content.get(path) {
         if let Some(lib_page) = app_data.site_config.lib.get(&page.tmpl_html) {
+            let content_string = update_and_get_in_memory(
+                &app_data,
+                path,
+                &page.file_path,
+                &page.github_project,
+                get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
+                .await;
+            if content_string.is_err() {
+                return Err(FileError::FileNotFound())
+            }
+
             // If requested path is specified, and tmplHtml is specified, load it
-            return update_and_get_in_memory(
+            let lib_file_string = update_and_get_in_memory(
                 &app_data,
                 &page.tmpl_html,
                 &lib_page.file_path,
                 &lib_page.github_project,
                 get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
                 .await;
+            if lib_file_string.is_err() {
+                return Err(FileError::FileNotFound())
+            }
+
+            match inject_content(&lib_file_string.as_ref().unwrap().content, &content_string.unwrap().content) {
+                Ok(injected) => return Ok(MemoryPage{content: injected, last_updated_at: lib_file_string.unwrap().last_updated_at}),
+                Err(_) => return Err(FileError::FileNotFound())
+            }
         } else {
-            // File not defined in config
+            // Lib file not defined in config
             return Err(FileError::FileNotFound())
         }
     } else {
-        // File not defined in config
+        // Config file not defined in config
         return Err(FileError::FileNotFound())
     }
+}
+
+fn inject_content(tmpl_file: &String, config_string: &String) -> Result<String, RenderError> {
+    let mut reg = Handlebars::new();
+
+    let template_config = TemplateContent{content: config_string.to_string()};
+
+    // register template using given name
+    reg.register_template_string("tmpl", tmpl_file)?;
+    return reg.render("tmpl", &to_json(template_config));
 }
 
 fn get_recache_seconds(page_recache_seconds: Option<u64>, default_recache_seconds: u64) -> u64 {
