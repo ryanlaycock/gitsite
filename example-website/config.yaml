@@ -12,7 +12,7 @@ lib:
 
 header:
   links:
-    - path: index
+    - path: ""
       name: Home
     - path: badgers
       name: Badgers

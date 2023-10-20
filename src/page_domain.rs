@@ -24,6 +24,7 @@ pub enum FileError {
 #[derive(Debug, Serialize)]
 struct TemplateContent {
     content: String,
+    header_links: Vec<HeaderLink>,
 }
 
 
@@ -83,7 +84,7 @@ pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Resul
                 return Err(FileError::FileNotFound())
             }
 
-            match inject_content(&lib_file_string.as_ref().unwrap().content, &content_string.unwrap().content) {
+            match inject_content(&lib_file_string.as_ref().unwrap().content, &content_string.unwrap().content, &app_data) {
                 Ok(injected) => return Ok(MemoryPage{content: injected, last_updated_at: lib_file_string.unwrap().last_updated_at}),
                 Err(_) => return Err(FileError::FileNotFound())
             }
@@ -97,10 +98,13 @@ pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Resul
     }
 }
 
-fn inject_content(tmpl_file: &String, config_string: &String) -> Result<String, RenderError> {
+fn inject_content(tmpl_file: &String, config_string: &String, app_data: &Arc<AppData>) -> Result<String, RenderError> {
     let mut reg = Handlebars::new();
 
-    let template_config = TemplateContent{content: config_string.to_string()};
+    let template_config = TemplateContent{
+        content: config_string.to_string(),
+        header_links: app_data.site_config.header.links.clone(),
+    };
 
     // register template using given name
     reg.register_template_string("tmpl", tmpl_file)?;
@@ -190,8 +194,4 @@ fn get_local_file_string(path: String) -> Result<String, FileError> {
         Ok(v) => return Ok(v),
         Err(_) => return Err(FileError::LocalFileNotFound())
     };
-}
-
-pub fn get_headers(app_data: &Arc<AppData>) -> Result<Vec<HeaderLink>, FileError> {
-    return Ok(app_data.site_config.header.links.clone());
 }

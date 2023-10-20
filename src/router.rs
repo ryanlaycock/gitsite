@@ -18,7 +18,5 @@ pub fn create_router(shared_state: Arc<AppData>) -> Router {
         
         .route("/", get(handlers::get_index_handler))
 
-        // API handlers
-        .route("/api/header/links", get(handlers::get_header_handler))
         .with_state(shared_state)
 }

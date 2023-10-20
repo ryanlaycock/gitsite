@@ -2,12 +2,10 @@ use crate::models::AppData;
 use crate::page_domain::{
     update_and_get_lib_page,
     update_and_get_page,
-    get_headers,
 };
 
 use axum::{
     response::IntoResponse,
-    Json,
     extract::{Path, State},
     http::StatusCode
 };
@@ -58,24 +56,4 @@ pub async fn get_index_handler(State(shared_state): State<Arc<AppData>>) ->  Res
             return Err((StatusCode::NOT_FOUND, [("", "")], ""));
         }
     }    
-}
-
-pub async fn get_header_handler(State(shared_state): State<Arc<AppData>>) ->  Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    println!("get_header_handler");
-    let app_data = shared_state;
-
-    match get_headers(&app_data) {
-        Ok(headers) => {
-            let json_response = serde_json::json!({
-                "data": headers,
-            });
-            return Ok((StatusCode::OK, Json(json_response)));
-        }
-        Err(err) => {
-            let error_response = serde_json::json!({
-                "error": err.to_string(),
-            });
-            return Err((StatusCode::NOT_FOUND, Json(error_response)))
-        } 
-    }
 }
