@@ -21,6 +21,8 @@ use tokio::sync::RwLock;
 async fn main() {
     let local_files_dir = env::var("LOCAL_FILES_DIR").expect("LOCAL_FILES_DIR not found");
     let cfg_file = env::var("CONFIG_FILE").expect("CONFIG_FILE not found");
+    let github_access_token = env::var("GITHUB_ACCESS_TOKEN").expect("GITHUB_ACCESS_TOKEN not found");
+    let github_auth = "Bearer ".to_string() + &github_access_token;
 
     env_logger::init();
 
@@ -41,6 +43,7 @@ async fn main() {
         site_config: site_config.unwrap(),
         local_files_dir: local_files_dir,
         memory_pages: memory_pages,
+        github_access_token: github_auth,
     });
 
     let app = create_router(shared_state);

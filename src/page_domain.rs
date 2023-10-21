@@ -165,7 +165,7 @@ async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, conten
     
     // Check if we should get this from GitHub
     if let Some(github_project_string) = github_project {
-        match get_github_file_string(github_project_string.to_owned(), content_file_path.to_owned()).await {
+        match get_github_file_string(github_project_string.to_owned(), content_file_path.to_owned(), app_data.github_access_token.clone()).await {
             Ok(file_string) => {
                 return Ok(cache_file_string(app_data, path.to_string(), file_string).await);
             },
@@ -204,7 +204,7 @@ async fn cache_file_string(app_data: &Arc<AppData>, path: String, file_string: S
     return new_memory_page;
 }
 
-async fn get_github_file_string(project: String, path: String) -> Result<String, reqwest::Error> {
+async fn get_github_file_string(project: String, path: String, access_token: String) -> Result<String, reqwest::Error> {
     let source = format!("https://api.github.com/repos/{}/contents/{}", project, path);
     println!("Requesting path {:?} from GitHub with request {:?}", path, source);
     let accept_header: String;
@@ -218,6 +218,7 @@ async fn get_github_file_string(project: String, path: String) -> Result<String,
         .get(source)
         .header(header::USER_AGENT, "gitsite")
         .header(header::ACCEPT, accept_header)
+        .header(header::AUTHORIZATION, access_token)
         .send()
         .await?.text().await {
         Ok(resp) => {

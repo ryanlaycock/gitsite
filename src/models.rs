@@ -72,4 +72,5 @@ pub struct AppData {
     pub site_config: Config,
     pub local_files_dir: String,
     pub memory_pages: RwLock<BTreeMap<String, MemoryPage>>,
+    pub github_access_token: String,
 }
