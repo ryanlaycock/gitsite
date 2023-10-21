@@ -18,6 +18,9 @@ header:
       name: Badgers
     - path: githubpage
       name: GitHub Example
+  socials:
+    - url: https://github.com/ryanlaycock/github-website-runner
+      icon: fa fa-github
 
 siteConfig:
   defaultRecacheSeconds: 1

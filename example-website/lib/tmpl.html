@@ -4,6 +4,7 @@
         <link rel="stylesheet" href="/lib/tmpl.css">
         <link rel="stylesheet" href="/lib/github-markdown-light.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src="/lib/tmpl.js"></script>
         <title>{{ title }}</title>
     </head>
@@ -24,7 +25,13 @@
                 </div>
                 <div id="right">
                     <ul id="socials">
-                        <li><a href="facebook.com">Facebook</a></li>
+                        {{#each header_socials as |header_social|}}
+                            <li>
+                                <a href="{{header_social.url}}">
+                                    <i class="{{header_social.icon}}"></i>
+                                </a>
+                            </li>
+                        {{/each}}
                     </ul>
                 </div>
             </div>

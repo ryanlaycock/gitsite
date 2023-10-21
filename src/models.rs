@@ -33,8 +33,16 @@ pub struct HeaderLink {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all="camelCase")]
+pub struct HeaderSocial {
+    pub url: String,
+    pub icon: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all="camelCase")]
 pub struct Header {
     pub links: Vec<HeaderLink>,
+    pub socials: Option<Vec<HeaderSocial>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
