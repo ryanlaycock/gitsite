@@ -1,15 +1,20 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: azure;
+    background-color: #E7DFDD;
+    color: #0E0B16;
+}
+
+#header {
+    background-color: #0E0B16;
 }
 
 #header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: aliceblue;
 	padding: 20px;
 	margin: 0 auto;
+    color: #E7DFDD;
 }
 
 #header ul {
@@ -29,7 +34,20 @@ body {
 
 #header-content a {
 	display: inline-block;
-	padding: .5em 1.5em;
+    padding-left: 20px;
+    color: #E7DFDD;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: normal;
+    transition-duration: 0.4s;
+}
+
+#header-content a:hover {
+    color: #A239CA;
+}
+
+#header-content .site-title-link {
+    font-weight: bold;
 }
 
 #content {

@@ -5,6 +5,8 @@ lib:
     filePath: "lib/index-tmpl.html"
   "tmpl.css":
     filePath: lib/tmpl.css
+  "index.css":
+    filePath: lib/index.css
   "tmpl.js":
     filePath: lib/tmpl.js
   "github-markdown-light.css":
@@ -14,45 +16,59 @@ lib:
 
 header:
   links:
-    - path: ""
-      name: Home
-    - path: badgers
-      name: Badgers
-    - path: githubpage
-      name: GitHub Example
+    - path: about
+      name: About
+    - path: docs
+      name: Docs
+    - path: showcase
+      name: Showcase
   socials:
-    - url: https://github.com/ryanlaycock/github-website-runner
+    - url: https://github.com/ryanlaycock/gitsite
       icon: fa fa-github
 
 siteConfig:
   defaultRecacheSeconds: 1
-  title: GitSite Demo
+  title: GitSite
 
 content:
   "":
     title: GitSite
     githubProject: ryanlaycock/gitsite
-    filePath: example-website/index.md
+    filePath: example-website/index/index.html
     tmplHtml: index-tmpl.html
-  "badgers":
-    title: Badgers 🦡
-    filePath: badgers/index.html
-    tmplHtml: tmpl.html
-    date: 2023-10-12
-    description: A simple page talking about badgers.
-    pinnedPosts:
-      - badgers/more
-  "badgers/more":
-    title: More badgers page
-    filePath: badgers/more/index.html
-    tmplHtml: tmpl.html
-    date: 2023-10-14
-    description: A page to talk about even MORE about badgers!🦡
-  "githubpage":
-    title: GitHub Example
-    filePath: README.md
-    tmplHtml: tmpl.html
-    githubProject: othneildrew/Best-README-Template
     recacheSeconds: 60
-    date: 2023-10-16
-    description: An example page demoing how we can pull public GitHub README.md files into our own site.
+  "about":
+    title: About
+    githubProject: ryanlaycock/gitsite
+    filePath: example-website/about/how-it-works.md
+    tmplHtml: tmpl.html
+    description: What is GitSite and how is it built?
+    date: 2023-10-21
+    recacheSeconds: 60
+  "docs":
+    title: Docs
+    githubProject: ryanlaycock/gitsite
+    filePath: example-website/docs/docs.md
+    tmplHtml: tmpl.html
+    date: 2023-10-21
+    recacheSeconds: 60
+    pinnedPosts:
+      - docs/quick-start
+      - showcase
+      - about
+  "docs/quick-start":
+    title: Quick Start Guide
+    githubProject: ryanlaycock/gitsite
+    filePath: example-website/docs/quick-start.md
+    tmplHtml: tmpl.html
+    date: 2023-10-21
+    description: Run this site locally in seconds!
+    recacheSeconds: 60
+  "showcase":
+    title: Showcase
+    githubProject: ryanlaycock/gitsite
+    filePath: example-website/showcase/showcase.html
+    tmplHtml: tmpl.html
+    date: 2023-10-21
+    description: Peoples awesome sites made with GitSite
+    recacheSeconds: 60
