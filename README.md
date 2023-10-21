@@ -44,3 +44,10 @@ See the /example-website for an example and guide to setting your own site up!
   - [ ] CSS/JS for standard web functions
 - [ ] Dockerise the runner
 - [ ] Write install docs
+
+## References
+
+- Templating:
+  - https://crates.io/crates/handlebars
+  - https://github.com/sunng87/handlebars-rust/blob/master/examples/render/template.hbs
+  - https://handlebarsjs.com/guide/#block-helpers
