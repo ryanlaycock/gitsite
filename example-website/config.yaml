@@ -1,14 +1,24 @@
 lib:
   "tmpl.html":
-    filePath: "lib/tmpl.html"
+    filePath: example-website/lib/tmpl.html
+    githubProject: ryanlaycock/gitsite
+    recacheSeconds: 60
   "index-tmpl.html":
-    filePath: "lib/index-tmpl.html"
+    filePath: example-website/lib/index-tmpl.html
+    githubProject: ryanlaycock/gitsite
+    recacheSeconds: 60
   "tmpl.css":
-    filePath: lib/tmpl.css
+    filePath: example-website/lib/tmpl.css
+    githubProject: ryanlaycock/gitsite
+    recacheSeconds: 60
   "index.css":
-    filePath: lib/index.css
+    filePath: example-website/lib/index.css
+    githubProject: ryanlaycock/gitsite
+    recacheSeconds: 60
   "tmpl.js":
-    filePath: lib/tmpl.js
+    filePath: example-website/lib/tmpl.js
+    githubProject: ryanlaycock/gitsite
+    recacheSeconds: 600
   "github-markdown-light.css":
     filePath: github-markdown-light.css
     githubProject: sindresorhus/github-markdown-css
