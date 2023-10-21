@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gardevoir"/>
+        <link rel="stylesheet" href="/lib/tmpl.css">
+        <link rel="stylesheet" href="/lib/github-markdown-light.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+        <script src="/lib/tmpl.js"></script>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        <header  id="header">
+            <div id="header-content">
+                <div id="left">
+                    <ul id="links">
+                        <li><a href="/">{{site_title}}</a></li>
+                        {{#each header_links as |header_link|}}
+                            <li>
+                                <a href="/{{header_link.path}}">
+                                    <div class='header-link-div'>{{header_link.name}}</div>
+                                </a>
+                            </li>
+                        {{/each}}
+                    </ul>
+                </div>
+                <div id="right">
+                    <ul id="socials">
+                        {{#each header_socials as |header_social|}}
+                            <li>
+                                <a href="{{header_social.url}}">
+                                    <i class="{{header_social.icon}}"></i>
+                                </a>
+                            </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+            <div id="intro">
+                <h1>GitSite</h1>
+                <h2>Static website builder, using GitHub as the content management system, and rendeing markdown files as the content</h2>
+                <button onclick="window.location.href='/docs/quick-start';">
+                    Click Here
+                </button>
+            </div>
+        </header >
+        <div id="content">{{{ content }}}
+        </div>
+    </body>
+</html>

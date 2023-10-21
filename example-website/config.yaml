@@ -1,6 +1,8 @@
 lib:
   "tmpl.html":
     filePath: "lib/tmpl.html"
+  "index-tmpl.html":
+    filePath: "lib/index-tmpl.html"
   "tmpl.css":
     filePath: lib/tmpl.css
   "tmpl.js":
@@ -28,12 +30,10 @@ siteConfig:
 
 content:
   "":
-    title: GitSite Demo
-    filePath: index.html
-    tmplHtml: tmpl.html
-    pinnedPosts:
-      - badgers
-      - githubpage
+    title: GitSite
+    githubProject: ryanlaycock/gitsite
+    filePath: example-website/index.md
+    tmplHtml: index-tmpl.html
   "badgers":
     title: Badgers 🦡
     filePath: badgers/index.html
