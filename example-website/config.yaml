@@ -21,6 +21,7 @@ header:
 
 siteConfig:
   defaultRecacheSeconds: 1
+  title: GitSite Demo
 
 content:
   "":

@@ -41,6 +41,7 @@ pub struct Header {
 #[serde(rename_all="camelCase")]
 pub struct SiteConfig {
     pub default_recache_seconds: u64,
+    pub title: String,
 }
 
 #[derive(Deserialize, Debug, Clone)]

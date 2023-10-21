@@ -25,6 +25,7 @@ pub enum FileError {
 struct TemplateContent {
     content: String,
     header_links: Vec<HeaderLink>,
+    site_title: String,
     title: String,
     pinned_posts: Vec<PinnedPost>,
 }
@@ -132,6 +133,7 @@ fn inject_content(tmpl_file: &String, config_string: &String, pinned_post_links_
         content: config_string.to_string(),
         header_links: app_data.site_config.header.links.clone(),
         title: title,
+        site_title: app_data.site_config.site_config.title.clone(),
         pinned_posts: pinned_posts,
     };
 
