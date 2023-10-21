@@ -3,13 +3,16 @@ use tokio::sync::RwLock;
 use std::time::SystemTime;
 use std::collections::BTreeMap;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Serialize)]
 #[serde(rename_all="camelCase")]
 pub struct Page {
     pub title: String,
     pub file_path: String,
     pub tmpl_html: String,
     pub github_project: Option<String>,
+    pub description: Option<String>,
+    pub date: Option<String>,
+    pub pinned_posts: Option<Vec<String>>,
     pub recache_seconds: Option<u64>,
 }
 

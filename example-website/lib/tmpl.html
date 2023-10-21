@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="/lib/github-markdown-light.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script src="/lib/tmpl.js"></script>
+        <title>{{ title }}</title>
     </head>
     <body>
         <header  id="header">
@@ -27,6 +28,18 @@
                 </div>
             </div>
         </header >
-        <div id="content">{{{ content }}}</div>
+        <div id="content">{{{ content }}}
+        </div>
+        <div id="pinned-posts">
+            {{#each pinned_posts as |pinned_post|}}
+            <a href="{{pinned_post.link}}">
+                <div class="card">
+                    <h3 class="title">{{pinned_post.title}}</h3>
+                    <p class="description">{{pinned_post.description}}</p>
+                    <p class="date">{{pinned_post.date}}</p>
+                </div>
+            </a>
+            {{/each}}
+        </div>
     </body>
 </html>

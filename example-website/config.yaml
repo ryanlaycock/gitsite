@@ -16,8 +16,6 @@ header:
       name: Home
     - path: badgers
       name: Badgers
-    - path: badgers/more
-      name: More Badgers
     - path: githubpage
       name: GitHub Example
 
@@ -26,20 +24,31 @@ siteConfig:
 
 content:
   "":
-    title: GitHub Website Runner Example
+    title: GitSite Demo
     filePath: index.html
     tmplHtml: tmpl.html
+    pinnedPosts:
+      - badgers
+      - githubpage
   "badgers":
-    title: Badgers page
+    title: Badgers 🦡
     filePath: badgers/index.html
     tmplHtml: tmpl.html
+    date: 2023-10-12
+    description: A simple page talking about badgers.
+    pinnedPosts:
+      - badgers/more
   "badgers/more":
     title: More badgers page
     filePath: badgers/more/index.html
     tmplHtml: tmpl.html
+    date: 2023-10-14
+    description: A page to talk about even MORE about badgers!🦡
   "githubpage":
     title: GitHub Example
     filePath: README.md
     tmplHtml: tmpl.html
     githubProject: othneildrew/Best-README-Template
     recacheSeconds: 60
+    date: 2023-10-16
+    description: An example page demoing how we can pull public GitHub README.md files into our own site.

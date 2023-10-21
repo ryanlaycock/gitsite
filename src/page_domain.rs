@@ -25,8 +25,17 @@ pub enum FileError {
 struct TemplateContent {
     content: String,
     header_links: Vec<HeaderLink>,
+    title: String,
+    pinned_posts: Vec<PinnedPost>,
 }
 
+#[derive(Debug, Serialize)]
+struct PinnedPost {
+    title: String,
+    description: Option<String>,
+    date: Option<String>,
+    link: String,
+}
 
 impl std::fmt::Display for FileError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -83,7 +92,13 @@ pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Resul
                 return Err(FileError::FileNotFound())
             }
 
-            match inject_content(&lib_file_string.as_ref().unwrap().content, &content_string.unwrap().content, &app_data) {
+            match inject_content(
+                &lib_file_string.as_ref().unwrap().content,
+                &content_string.unwrap().content,
+                page.pinned_posts.clone(),
+                page.title.clone(),
+                &app_data) 
+            {
                 Ok(injected) => return Ok(MemoryPage{content: injected, last_updated_at: lib_file_string.unwrap().last_updated_at}),
                 Err(_) => return Err(FileError::FileNotFound())
             }
@@ -97,12 +112,27 @@ pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Resul
     }
 }
 
-fn inject_content(tmpl_file: &String, config_string: &String, app_data: &Arc<AppData>) -> Result<String, RenderError> {
+fn inject_content(tmpl_file: &String, config_string: &String, pinned_post_links_option: Option<Vec<String>>, title: String, app_data: &Arc<AppData>) -> Result<String, RenderError> {
     let mut reg = Handlebars::new();
+
+    let mut pinned_posts: Vec<PinnedPost> = vec![];
+    let pinned_post_links = pinned_post_links_option.unwrap_or_default();
+    for post_link in pinned_post_links.iter() {
+        if let Some(page) = app_data.site_config.content.get(post_link) {
+            pinned_posts.push(PinnedPost{
+                title: page.title.clone(),
+                description: page.description.clone(),
+                date: page.date.clone(),
+                link: post_link.to_owned(),
+            });
+        }
+    }
 
     let template_config = TemplateContent{
         content: config_string.to_string(),
         header_links: app_data.site_config.header.links.clone(),
+        title: title,
+        pinned_posts: pinned_posts,
     };
 
     // register template using given name
