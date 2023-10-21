@@ -186,8 +186,21 @@ async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, conten
 
 }
 
-pub fn get_local_config(file_location: &String) -> Result<Config, FileError> {
-    let file_str = match std::fs::read_to_string(file_location) {
+pub async fn get_config_file(file_path: &String, github_project_string: String, github_access_token: &String) -> Result<Config, FileError> {
+    if github_project_string != "" {
+        // Fetch config file from GitHub
+        match get_github_file_string(github_project_string.to_owned(), file_path.to_owned(), github_access_token.to_owned()).await {
+            Ok(file_string) => {
+                let config: Config = serde_yaml::from_str(&file_string.to_string()).unwrap();
+                return Ok(config);
+                // TODO Error handle on read
+            },
+            Err(_) => return Err(FileError::FileNotFound())
+        };
+    }
+
+    // Else fetch locally
+    let file_str = match std::fs::read_to_string(file_path) {
         Ok(v) => v,
         Err(err) => return Err(FileError::FileReadError(err)),
     };
@@ -208,10 +221,10 @@ async fn get_github_file_string(project: String, path: String, access_token: Str
     let source = format!("https://api.github.com/repos/{}/contents/{}", project, path);
     println!("Requesting path {:?} from GitHub with request {:?}", path, source);
     let accept_header: String;
-    if path.ends_with("html") {
-        accept_header = "application/vnd.github.raw".to_string();
-    } else {
+    if path.ends_with("md") {
         accept_header = "application/vnd.github.html".to_string();
+    } else {
+        accept_header = "application/vnd.github.raw".to_string();
     }
     let client = reqwest::Client::new();
     match client
