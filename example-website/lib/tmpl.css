@@ -46,12 +46,19 @@ body {
     color: #A239CA;
 }
 
+#header-content i {
+    font-size: 40px;
+}
+
 #header-content .site-title-link {
     font-weight: bold;
 }
 
 #content {
     margin: 30px;
+    width:70%;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 #pinned-posts {
