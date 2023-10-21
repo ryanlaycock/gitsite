@@ -59,6 +59,9 @@ body {
     width:70%;
     margin-right: auto;
     margin-left: auto;
+}
+
+.markdown-body {
     background-color: #E7DFDD;
 }
 
