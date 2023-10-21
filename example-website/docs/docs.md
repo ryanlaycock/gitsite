@@ -1,3 +1,3 @@
 # GitSite Documentation
 
-[Quick Start Guide](quick-start)
+[Quick Start Guide](/quick-start)

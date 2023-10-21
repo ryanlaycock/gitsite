@@ -12,7 +12,7 @@ use axum::{
 use std::sync::Arc;
 
 pub async fn get_lib_handler(Path(path): Path<String>, State(shared_state): State<Arc<AppData>>) ->  Result<impl IntoResponse, (StatusCode, [(&'static str, &'static str); 1], &'static str)> {
-    println!("get_content_handler {:?}", path);
+    println!("get_lib_handler {:?}", path);
     let app_data = shared_state;
        
     match update_and_get_lib_page(app_data.to_owned(), &path).await {
@@ -26,7 +26,7 @@ pub async fn get_lib_handler(Path(path): Path<String>, State(shared_state): Stat
 }
 
 pub async fn get_page_handler(Path(path): Path<String>, State(shared_state): State<Arc<AppData>>) ->  Result<impl IntoResponse, (StatusCode, [(&'static str, &'static str); 1], &'static str)> {
-    println!("Request for get_tmpl_handler file at {:?}", path);
+    println!("Request for get_page_handler file at {:?}", path);
     let app_data = shared_state;
        
     match update_and_get_page(app_data.to_owned(), &path).await {

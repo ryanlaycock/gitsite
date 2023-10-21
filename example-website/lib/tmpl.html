@@ -1,5 +1,6 @@
 <html>
     <head>
+        <meta charset="UTF-8">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gardevoir"/>
         <link rel="stylesheet" href="/lib/tmpl.css">
         <link rel="stylesheet" href="/lib/github-markdown-light.css">
@@ -13,7 +14,7 @@
             <div id="header-content">
                 <div id="left">
                     <ul id="links">
-                        <li><a href="/">{{site_title}}</a></li>
+                        <li><a href="/" class="site-title-link">{{site_title}}</a></li>
                         {{#each header_links as |header_link|}}
                             <li>
                                 <a href="/{{header_link.path}}">

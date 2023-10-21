@@ -43,8 +43,6 @@ async fn main() {
         memory_pages: memory_pages,
     });
 
-    println!("{:?}", shared_state);
-
     let app = create_router(shared_state);
 
     axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())

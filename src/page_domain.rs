@@ -8,6 +8,7 @@ use crate::models::{
 };
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
+use axum::body::StreamBody;
 use reqwest::header;
 use handlebars::{Handlebars, to_json, RenderError};
 use serde::Serialize;
@@ -88,7 +89,7 @@ pub async fn update_and_get_page(app_data: Arc<AppData>, path: &String) -> Resul
                 &page.tmpl_html,
                 &lib_page.file_path,
                 &lib_page.github_project,
-                get_recache_seconds(page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
+                get_recache_seconds(lib_page.recache_seconds, app_data.site_config.site_config.default_recache_seconds))
                 .await;
             if lib_file_string.is_err() {
                 return Err(FileError::FileNotFound())
@@ -154,7 +155,7 @@ fn get_recache_seconds(page_recache_seconds: Option<u64>, default_recache_second
 async fn update_and_get_in_memory(app_data: &Arc<AppData>, path: &String, content_file_path: &String, github_project: &Option<String>, cache_time: u64) -> Result<MemoryPage, FileError> {
     // Check if we already have this cached
     if let Some(memory_page) = app_data.memory_pages.read().await.get(path) {
-        println!("Already cached memory_page {:?}", memory_page);
+        println!("Already cached memory_page {:?}", path);
         if SystemTime::now().duration_since(memory_page.last_updated_at).unwrap_or(Duration::from_secs(0)) < Duration::from_secs(cache_time) {
             return Ok(memory_page.to_owned());
         }
@@ -200,22 +201,26 @@ pub fn get_local_config(file_location: &String) -> Result<Config, FileError> {
 async fn cache_file_string(app_data: &Arc<AppData>, path: String, file_string: String) -> MemoryPage {
     let new_memory_page: MemoryPage = MemoryPage { content: file_string, last_updated_at: SystemTime::now() };
     app_data.memory_pages.write().await.insert(path.to_string(), new_memory_page.clone());
-    println!("Memory page after cache {:?}", app_data);
     return new_memory_page;
 }
 
 async fn get_github_file_string(project: String, path: String) -> Result<String, reqwest::Error> {
     let source = format!("https://api.github.com/repos/{}/contents/{}", project, path);
     println!("Requesting path {:?} from GitHub with request {:?}", path, source);
+    let accept_header: String;
+    if path.ends_with("html") {
+        accept_header = "application/vnd.github.raw".to_string();
+    } else {
+        accept_header = "application/vnd.github.html".to_string();
+    }
     let client = reqwest::Client::new();
     match client
         .get(source)
         .header(header::USER_AGENT, "gitsite")
-        .header(header::ACCEPT, "application/vnd.github.html")
+        .header(header::ACCEPT, accept_header)
         .send()
         .await?.text().await {
         Ok(resp) => {
-            println!("body = {:?}", resp);
             return Ok(resp);
         },
         Err(err) => return Err(err),
