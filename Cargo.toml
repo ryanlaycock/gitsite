@@ -1,5 +1,5 @@
 [package]
-name = "github-website-runner"
+name = "gitsite"
 version = "0.1.0"
 edition = "2021"
 
