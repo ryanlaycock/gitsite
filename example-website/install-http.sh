@@ -37,4 +37,5 @@ curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-web
 # docker-compose up -d example-website
 
 echo "Running example-website docker containers"
-sudo docker-compose up -f ryanlaycock/gitsite/example-website/docker-compose.yaml -e GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN -d
+cd ryanlaycock/gitsite/example-website/docker-compose.yaml
+sudo GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN docker-compose up -d
