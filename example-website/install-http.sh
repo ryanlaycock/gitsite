@@ -27,7 +27,7 @@ docker-compose --version
 # Download example-website docker-compose.yaml
 
 echo "Fetching example-website docker-compose.yaml"
-curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-website/docker-compose.yaml -o ryanlaycock/gitsite/example-website/
+curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-website/docker-compose.yaml -o ryanlaycock/gitsite/example-website/docker-compose.yaml
 
 # Download nginx conf
 

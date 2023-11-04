@@ -11,5 +11,5 @@ git-sha:
 	echo $(GIT_SHA)
 
 docker-build-push:
-	docker build . -t gitsite:$(GIT_SHA) -f Dockerfile
+	docker build . -t ryanlaycock/gitsite:$(GIT_SHA) -f Dockerfile
 	docker push ryanlaycock/gitsite:$(GIT_SHA)
