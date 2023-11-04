@@ -21,9 +21,7 @@ In this short tutorial we'll show you how to run _this_ site locally, and explai
 
 3. Run the installed shell script, specifying the previous GitHub access token in the command.
     ```
-    docker run adlkjansasdasd \\
-        1=2
-        1=2
+    bash install-http.sh <GITHUB_ACCESS_TOKEN>
     ```
 
 4. Success! 🚀
