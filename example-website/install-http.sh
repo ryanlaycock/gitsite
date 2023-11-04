@@ -27,12 +27,12 @@ docker-compose --version
 # Download example-website docker-compose.yaml
 
 echo "Fetching example-website docker-compose.yaml"
-curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-website/docker-compose.yaml -o ryanlaycock/gitsite/example-website/docker-compose.yaml
+curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-website/docker-compose.yaml --create-dirs -o ryanlaycock/gitsite/example-website/docker-compose.yaml
 
 # Download nginx conf
 
 echo "Fetching example-website nginx.conf"
-curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-website/app-http.conf -o /etc/nginx/conf.d/app.conf
+curl -L https://raw.githubusercontent.com/ryanlaycock/gitsite/master/example-website/app-http.conf --create-dirs -o /etc/nginx/conf.d/app.conf
 
 # docker-compose up -d example-website
 
