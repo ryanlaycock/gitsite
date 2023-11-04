@@ -1,7 +1,7 @@
 version: '3'
 services:
   gitsite:
-    image: ryanlaycock/gitsite:latest
+    image: ryanlaycock/gitsite:ff814a8
     container_name: gitsite
     restart: unless-stopped
     environment:
