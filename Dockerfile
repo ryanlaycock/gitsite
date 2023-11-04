@@ -1,16 +1,14 @@
-FROM rust:1.73.0-slim-bookworm AS builder
+# Using full rust image. This creates a large image size but works
+# with libssl
+# TODO Investigate using a smaller base image
+FROM rust:1.73.0
 
-COPY Cargo.lock Cargo.lock
-COPY Cargo.toml Cargo.toml
-COPY /src /src
+RUN apt-get update && apt-get install -y libssl-dev
+
+WORKDIR /app
+
+COPY . .
+
 RUN cargo build --release
 
-FROM debian:bookworm-slim
-
-# RUN apt-get update && apt install -y pkg-config
-
-# RUN apt install -y libssl3
-RUN apt-get update && apt-get install -y pkg-config && apt-get install -y libssl3 && apt clean && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder ./target/release/gitsite ./target/release/gitsite
-CMD ["/target/release/gitsite"]
+CMD ["/app/target/release/gitsite"]
